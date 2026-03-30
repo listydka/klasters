@@ -1,46 +1,42 @@
-from sklearn.cluster import AgglomerativeClustering
+import math, random
 import matplotlib.pyplot as plt
-import numpy as np
+from sklearn.cluster import AgglomerativeClustering
 
 cities, names = [], []
 with open("city.txt", encoding="utf-8") as f:
     for line in f:
-        parts = line.strip().split()
-        if len(parts) < 3: continue
-        names.append(parts[0])
-        cities.append([float(parts[1]), float(parts[2])])
-cities = np.array(cities)
-
+        p = line.strip().split()
+        if len(p) < 3: continue
+        names.append(p[0])
+        cities.append([float(p[1]), float(p[2])])
 n = len(cities)
-while True:
-    K = int(input("Введите количество кластеров: "))
-    if 1 <= K <= n: break
-    print(f"Количество кластеров должно быть от 1 до {n}")
 
-model = AgglomerativeClustering(n_clusters=K, linkage='single')  # минимальное расстояние
+K = int(input(f"Введите количество кластеров (1-{n}): "))
+
+model = AgglomerativeClustering(n_clusters=K)
 labels = model.fit_predict(cities)
 
-for k in range(K):
-    cluster_idx = np.where(labels==k)[0]
-    print(f"\nКластер {k+1}")
-    for i in cluster_idx:
-        # расстояние до "центра" можно вычислить как среднее точки
-        cx, cy = cities[cluster_idx].mean(axis=0)
-        d = np.linalg.norm(cities[i]-[cx,cy])
-        print(f"  {names[i]} ({d:.2f})")
-    print(f"Центр: ({cx:.2f},{cy:.2f})")
+clusters = [[] for _ in range(K)]
+for i,label in enumerate(labels):
+    clusters[label].append(i)
+
+print("\nРезультат кластеризации:")
+for idx, cluster in enumerate(clusters):
+    print(f"\nКластер {idx+1}:")
+    for i in cluster:
+        print(f"  {names[i]} ({cities[i][0]:.2f},{cities[i][1]:.2f})")
 
 colors = ["red","blue","green","orange","purple","brown","pink","cyan"]
 plt.figure(figsize=(8,6))
-for k in range(K):
-    idx = np.where(labels==k)[0]
-    plt.scatter(cities[idx,1], cities[idx,0], color=colors[k%len(colors)], label=f"Кластер {k+1}")
-    for i in idx:
-        plt.text(cities[i,1], cities[i,0], names[i])
-# центры
-for k in range(K):
-    idx = np.where(labels==k)[0]
-    cx, cy = cities[idx].mean(axis=0)
-    plt.scatter(cy, cx, marker='x', s=200, color='black')
-plt.xlabel("Долгота"); plt.ylabel("Широта"); plt.title("Агломеративная кластеризация")
-plt.legend(); plt.grid(); plt.axis("equal"); plt.show()
+for i,c in enumerate(clusters):
+    xs = [cities[j][1] for j in c]  # долгота
+    ys = [cities[j][0] for j in c]  # широта
+    plt.scatter(xs, ys, color=colors[i%len(colors)], label=f"Кластер {i+1}")
+    for j in c: plt.text(cities[j][1], cities[j][0], names[j])
+plt.xlabel("Долгота")
+plt.ylabel("Широта")
+plt.title("Агломеративная кластеризация городов")
+plt.legend()
+plt.grid()
+plt.axis("equal")
+plt.show()
