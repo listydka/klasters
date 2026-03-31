@@ -1,4 +1,5 @@
 import math
+from datetime import datetime
 cities = []
 names = []
 with open("city.txt", encoding="utf-8") as f:
@@ -32,7 +33,7 @@ for i in range(n):
 
 clusters = [[i] for i in range(n)]
 
-
+start = datetime.now()
 while len(clusters) > K:
    min_sum = float("inf")
    best_pair = (0, 1)
@@ -52,6 +53,8 @@ while len(clusters) > K:
    i, j = best_pair
    clusters[i] += clusters[j]
    clusters.pop(j)
+end = datetime.now()
+print(f"\nВремя работы: {end - start} ")
 print("\nРезультат кластеризации:")
 for idx, cluster in enumerate(clusters):
    cluster_names = [names[i] for i in cluster]
