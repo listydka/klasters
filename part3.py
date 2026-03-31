@@ -1,4 +1,5 @@
 import math, random
+from datetime import datetime
 import matplotlib.pyplot as plt
 from sklearn.cluster import AgglomerativeClustering
 
@@ -12,10 +13,11 @@ with open("city.txt", encoding="utf-8") as f:
 n = len(cities)
 
 K = int(input(f"Введите количество кластеров (1-{n}): "))
-
+start = datetime.now()
 model = AgglomerativeClustering(n_clusters=K)
 labels = model.fit_predict(cities)
-
+end = datetime.now()
+print(f"\nВремя работы: {end - start} ")
 clusters = [[] for _ in range(K)]
 for i,label in enumerate(labels):
     clusters[label].append(i)
